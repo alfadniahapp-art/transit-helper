@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'theme.dart';
 import 'screens/translator_screen.dart';
 
 void main() {
@@ -10,80 +11,162 @@ class TransitApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'مرشد المسافر',
+      title: 'Travel Mate',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.teal),
-      home: const HomeScreen(),
+      theme: buildAppTheme(),
+      home: const MainNavigationScreen(),
     );
   }
 }
 
-// ================= الشاشة الرئيسية =================
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+// ================= الشاشة الرئيسية مع التبويبات السفلية =================
+class MainNavigationScreen extends StatefulWidget {
+  const MainNavigationScreen({super.key});
+  @override
+  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
+}
+
+class _MainNavigationScreenState extends State<MainNavigationScreen> {
+  int _currentIndex = 0;
+
+  // قائمة الشاشات التي ستظهر عند الضغط على التبويبات السفلية
+  final List<Widget> _screens = [
+    const HomeScreenContent(), // الشاشة الرئيسية
+    const TranslatorScreen(),  // المترجم
+    const TravelStepsScreen(), // خطوات السفر
+    const TransitCalculatorScreen(), // الحاسبة
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('مرشد المسافر الذكي'),
-        centerTitle: true,
-        backgroundColor: Colors.teal,
+      body: _screens[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: AppColors.white,
+        selectedItemColor: AppColors.navy,
+        unselectedItemColor: Colors.grey,
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+        unselectedLabelStyle: const TextStyle(fontSize: 11),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'الرئيسية'),
+          BottomNavigationBarItem(icon: Icon(Icons.translate), label: 'ترجمة'),
+          BottomNavigationBarItem(icon: Icon(Icons.directions_walk), label: 'الخطوات'),
+          BottomNavigationBarItem(icon: Icon(Icons.timer), label: 'الحاسبة'),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            _buildMainCard(
-              context,
-              title: 'خطوات السفر من البيت للمطار',
-              icon: Icons.directions_walk,
-              color: Colors.blueAccent,
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TravelStepsScreen())),
+    );
+  }
+}
+
+// ================= محتوى الشاشة الرئيسية =================
+class HomeScreenContent extends StatelessWidget {
+  const HomeScreenContent({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          // الهيدر الكحلي
+          SliverAppBar(
+            expandedHeight: 120.0,
+            floating: false,
+            pinned: true,
+            backgroundColor: AppColors.navy,
+            flexibleSpace: FlexibleSpaceBar(
+              title: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppColors.gold,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.explore, color: AppColors.navy, size: 20),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text('Travel Mate', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1)),
+                ],
+              ),
+              centerTitle: true,
             ),
-            const SizedBox(height: 16),
-            _buildMainCard(
-              context,
-              title: 'المترجم الفوري لموظفي المطار',
-              icon: Icons.translate,
-              color: Colors.orange,
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TranslatorScreen())),
+          ),
+          
+          // محتوى الشاشة
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                const Text('أهلاً بك، مسافر 👋', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.navy)),
+                const SizedBox(height: 4),
+                const Text('اختر القسم الذي تحتاجه', style: TextStyle(fontSize: 13, color: Colors.grey)),
+                const SizedBox(height: 16),
+                
+                // شبكة البطاقات (Grid)
+                GridView.count(
+                  crossAxisCount: 2,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 1.1,
+                  children: [
+                    _buildGateCard(context, 'الأساسيات', 'تحيات، وقت، أرقام', Icons.abc, AppColors.gold, AppColors.navy, isGold: true),
+                    _buildGateCard(context, 'المطار والطيران', 'تسجيل، حقائب', Icons.flight, AppColors.navy, AppColors.white),
+                    _buildGateCard(context, 'الجوازات', 'تأشيرات وتفتيش', Icons.passport, AppColors.navy, AppColors.white),
+                    _buildGateCard(context, 'التاكسي', 'مواصلات', Icons.local_taxi, AppColors.navy, AppColors.white),
+                    _buildGateCard(context, 'الفندق', 'حجز وغرف', Icons.hotel, AppColors.navy, AppColors.white),
+                    _buildGateCard(context, 'الطوارئ', 'صحة ومساعدة', Icons.medical_services, AppColors.navy, AppColors.white),
+                  ],
+                ),
+              ]),
             ),
-            const SizedBox(height: 16),
-            _buildMainCard(
-              context,
-              title: 'حاسبة وقت الترانزيت',
-              icon: Icons.timer,
-              color: Colors.teal,
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TransitCalculatorScreen())),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildMainCard(BuildContext context, {required String title, required IconData icon, required Color color, required VoidCallback onTap}) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(15),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Row(
-            children: [
-              Icon(icon, size: 40, color: color),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  Widget _buildGateCard(BuildContext context, String title, String sub, IconData icon, Color bgColor, Color textColor, {bool isGold = false}) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: isGold ? [AppColors.gold, const Color(0xFFB8952E)] : [AppColors.navy, AppColors.navy2],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: bgColor.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            // سيتم ربط هذه البطاقات بالشاشات لاحقاً
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('قريباً: $title')));
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Icon(icon, color: textColor, size: 32),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                    const SizedBox(height: 2),
+                    Text(sub, style: TextStyle(color: textColor.withOpacity(0.7), fontSize: 11)),
+                  ],
                 ),
-              ),
-              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -91,19 +174,17 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-// ================= 1. شاشة خطوات السفر =================
+// ================= 3. شاشة خطوات السفر (نفس التصميم السابق) =================
 class TravelStepsScreen extends StatelessWidget {
   const TravelStepsScreen({super.key});
 
   final List<Map<String, dynamic>> steps = const [
-    {'title': '1. من البيت إلى المطار', 'desc': 'احجز سيارة أجرة (تاكسي) أو استخدم تطبيق نقل. تأكد من مغادرة البيت قبل 3 ساعات من موعد الرحلة.', 'icon': Icons.local_taxi},
-    {'title': '2. الوصول لصالة المغادرة', 'desc': 'ابحث عن شاشة الرحلات لمعرفة رقم كاونتر شركة الطيران الخاصة بك.', 'icon': Icons.flight_takeoff},
-    {'title': '3. كاونتر الحجز (Check-in)', 'desc': 'قابل موظف الحجز. قدم جواز السفر. سيقوم الموظف بوزن حقائبك وتسليمك كرت الصعود (Boarding Pass).', 'icon': Icons.badge},
-    {'title': '4. وزن الأمتعة (Baggage Drop)', 'desc': 'إذا كانت حقيبتك أكبر من المقاس المسموح، سيقوم الموظف بأخذها لتوضع في الطائرة (احتفظ بالتغسيلة).', 'icon': Icons.luggage},
-    {'title': '5. الجوازات (Passport Control)', 'desc': 'قف في طابور الجوازات. قدم جواز السفر وبطاقة الصعود للموظف ليضع ختم الخروج.', 'icon': Icons.credit_card},
-    {'title': '6. التفتيش الأمني (Security)', 'desc': 'ضع حزامك، هاتفك، والسوائل في الصينية. مر عبر جهاز الأشعة السينية.', 'icon': Icons.security},
-    {'title': '7. صالة الانتظار (Gate)', 'desc': 'اذهب إلى رقم البوابة (Gate) المكتوب على بطاقة الصعود. راقب الشاشات لموعد الإقلاع.', 'icon': Icons.airline_seat_recline_normal},
-    {'title': '8. الصعود للطائرة (Boarding)', 'desc': 'قدم بطاقة الصعود للموظف واصعد للطائرة.', 'icon': Icons.airplanemode_active},
+    {'title': '1. من البيت إلى المطار', 'desc': 'احجز تاكسي. غادر قبل 3 ساعات.', 'icon': Icons.local_taxi},
+    {'title': '2. كاونتر الحجز', 'desc': 'قدم جواز السفر، وزن الحقائب، استلم كرت الصعود.', 'icon': Icons.badge},
+    {'title': '3. الجوازات', 'desc': 'قدم جوازك للموظف ليضع ختم الخروج.', 'icon': Icons.credit_card},
+    {'title': '4. التفتيش الأمني', 'desc': 'ضع أغراضك في الصينية ومر عبر الأشعة.', 'icon': Icons.security},
+    {'title': '5. صالة الانتظار', 'desc': 'اذهب لبوابتك (Gate) وراقب الشاشات.', 'icon': Icons.airline_seat_recline_normal},
+    {'title': '6. الصعود للطائرة', 'desc': 'قدم كرت الصعود واصعد.', 'icon': Icons.airplanemode_active},
   ];
 
   @override
@@ -111,7 +192,7 @@ class TravelStepsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('خطوات السفر')),
       body: ListView.builder(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         itemCount: steps.length,
         itemBuilder: (context, index) {
           final step = steps[index];
@@ -119,15 +200,14 @@ class TravelStepsScreen extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: Colors.teal.shade100,
-                child: Icon(step['icon'], color: Colors.teal),
+                backgroundColor: AppColors.navy.withOpacity(0.1),
+                child: Icon(step['icon'], color: AppColors.navy),
               ),
-              title: Text(step['title'], style: const TextStyle(fontWeight: FontWeight.bold)),
+              title: Text(step['title'], style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.navy)),
               subtitle: Padding(
-                padding: const EdgeInsets.only(top: 8.0),
+                padding: const EdgeInsets.only(top: 6),
                 child: Text(step['desc']),
               ),
-              isThreeLine: true,
             ),
           );
         },
@@ -136,7 +216,7 @@ class TravelStepsScreen extends StatelessWidget {
   }
 }
 
-// ================= 3. شاشة حاسبة الترانزيت =================
+// ================= 4. شاشة الحاسبة (نفس التصميم السابق) =================
 class TransitCalculatorScreen extends StatefulWidget {
   const TransitCalculatorScreen({super.key});
   @override
@@ -167,30 +247,51 @@ class _TransitCalculatorScreenState extends State<TransitCalculatorScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('حاسبة الترانزيت')),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            DropdownButtonFormField<String>(
-              value: selectedAirport,
-              decoration: const InputDecoration(labelText: 'اختر مطار الترانزيت', border: OutlineInputBorder()),
-              items: airports.keys.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-              onChanged: (v) => setState(() => selectedAirport = v!),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(child: ElevatedButton(onPressed: () => pickTime(true), child: Text(arrival == null ? 'وقت الوصول' : 'الوصول: ${arrival!.format(context)}'))),
-                const SizedBox(width: 10),
-                Expanded(child: ElevatedButton(onPressed: () => pickTime(false), child: Text(departure == null ? 'وقت المغادرة' : 'المغادرة: ${departure!.format(context)}'))),
-              ],
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
-              icon: const Icon(Icons.calculate),
-              label: const Text('احسب التوصية'),
-              onPressed: (arrival != null && departure != null) ? () => _calculate(context) : null,
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    DropdownButtonFormField<String>(
+                      value: selectedAirport,
+                      decoration: const InputDecoration(labelText: 'اختر مطار الترانزيت', border: OutlineInputBorder()),
+                      items: airports.keys.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                      onChanged: (v) => setState(() => selectedAirport = v!),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.flight_land),
+                            onPressed: () => pickTime(true), 
+                            label: Text(arrival == null ? 'وصول' : arrival!.format(context)),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.flight_takeoff),
+                            onPressed: () => pickTime(false), 
+                            label: Text(departure == null ? 'مغادرة' : departure!.format(context)),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.gold, foregroundColor: AppColors.navy),
+                      icon: const Icon(Icons.calculate),
+                      label: const Text('احسب التوصية'),
+                      onPressed: (arrival != null && departure != null) ? () => _calculate(context) : null,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
