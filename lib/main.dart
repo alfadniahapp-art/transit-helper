@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'theme.dart';
+import 'data/phrases_data.dart';
 import 'screens/translator_screen.dart';
+import 'screens/category_screen.dart';
 
 void main() {
   runApp(const TransitApp());
@@ -19,7 +21,7 @@ class TransitApp extends StatelessWidget {
   }
 }
 
-// ================= الشاشة الرئيسية مع التبويبات السفلية =================
+// ================= الشاشة الرئيسية مع التبويبات =================
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
   @override
@@ -28,13 +30,12 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
-
-  // قائمة الشاشات التي ستظهر عند الضغط على التبويبات السفلية
+  
   final List<Widget> _screens = [
-    const HomeScreenContent(), // الشاشة الرئيسية
-    const TranslatorScreen(),  // المترجم
-    const TravelStepsScreen(), // خطوات السفر
-    const TransitCalculatorScreen(), // الحاسبة
+    const HomeScreenContent(),
+    const TranslatorScreen(),
+    const TravelStepsScreen(),
+    const TransitCalculatorScreen(),
   ];
 
   @override
@@ -70,7 +71,6 @@ class HomeScreenContent extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // الهيدر الكحلي
           SliverAppBar(
             expandedHeight: 120.0,
             floating: false,
@@ -82,10 +82,7 @@ class HomeScreenContent extends StatelessWidget {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: AppColors.gold,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    decoration: BoxDecoration(color: AppColors.gold, borderRadius: BorderRadius.circular(8)),
                     child: const Icon(Icons.explore, color: AppColors.navy, size: 20),
                   ),
                   const SizedBox(width: 10),
@@ -95,8 +92,6 @@ class HomeScreenContent extends StatelessWidget {
               centerTitle: true,
             ),
           ),
-          
-          // محتوى الشاشة
           SliverPadding(
             padding: const EdgeInsets.all(16),
             sliver: SliverList(
@@ -105,8 +100,6 @@ class HomeScreenContent extends StatelessWidget {
                 const SizedBox(height: 4),
                 const Text('اختر القسم الذي تحتاجه', style: TextStyle(fontSize: 13, color: Colors.grey)),
                 const SizedBox(height: 16),
-                
-                // شبكة البطاقات (Grid)
                 GridView.count(
                   crossAxisCount: 2,
                   shrinkWrap: true,
@@ -115,12 +108,16 @@ class HomeScreenContent extends StatelessWidget {
                   mainAxisSpacing: 12,
                   childAspectRatio: 1.1,
                   children: [
-                    _buildGateCard(context, 'الأساسيات', 'تحيات، وقت، أرقام', Icons.abc, AppColors.gold, AppColors.navy, isGold: true),
-                    _buildGateCard(context, 'المطار والطيران', 'تسجيل، حقائب', Icons.flight, AppColors.navy, AppColors.white),
-                    _buildGateCard(context, 'الجوازات', 'تأشيرات وتفتيش', Icons.passport, AppColors.navy, AppColors.white),
-                    _buildGateCard(context, 'التاكسي', 'مواصلات', Icons.local_taxi, AppColors.navy, AppColors.white),
-                    _buildGateCard(context, 'الفندق', 'حجز وغرف', Icons.hotel, AppColors.navy, AppColors.white),
-                    _buildGateCard(context, 'الطوارئ', 'صحة ومساعدة', Icons.medical_services, AppColors.navy, AppColors.white),
+                    _buildGateCard(context, 'الأساسيات', 'تحيات، وقت، أرقام', Icons.abc, PhrasesData.basics, isGold: true),
+                    _buildGateCard(context, 'المطار والطيران', 'تسجيل، حقائب', Icons.flight, PhrasesData.airport),
+                    _buildGateCard(context, 'الجوازات', 'تأشيرات وتفتيش', Icons.credit_card, PhrasesData.passport),
+                    _buildGateCard(context, 'التاكسي', 'مواصلات', Icons.local_taxi, PhrasesData.taxi),
+                    _buildGateCard(context, 'الفندق', 'حجز وغرف', Icons.hotel, PhrasesData.hotel),
+                    _buildGateCard(context, 'العملة', 'صرافة وبنوك', Icons.currency_exchange, PhrasesData.money),
+                    _buildGateCard(context, 'المطاعم', 'طلب وطعام', Icons.restaurant, PhrasesData.restaurant),
+                    _buildGateCard(context, 'التسوق', 'أسعار ومقاسات', Icons.shopping_bag, PhrasesData.shopping),
+                    _buildGateCard(context, 'الاتصالات', 'شرائح وواي فاي', Icons.sim_card, PhrasesData.sim),
+                    _buildGateCard(context, 'الطوارئ', 'صحة ومساعدة', Icons.medical_services, PhrasesData.emergency),
                   ],
                 ),
               ]),
@@ -131,7 +128,7 @@ class HomeScreenContent extends StatelessWidget {
     );
   }
 
-  Widget _buildGateCard(BuildContext context, String title, String sub, IconData icon, Color bgColor, Color textColor, {bool isGold = false}) {
+  Widget _buildGateCard(BuildContext context, String title, String sub, IconData icon, List<Phrase> phrases, {bool isGold = false}) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -140,15 +137,14 @@ class HomeScreenContent extends StatelessWidget {
           colors: isGold ? [AppColors.gold, const Color(0xFFB8952E)] : [AppColors.navy, AppColors.navy2],
         ),
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: bgColor.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: (isGold ? AppColors.gold : AppColors.navy).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () {
-            // سيتم ربط هذه البطاقات بالشاشات لاحقاً
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('قريباً: $title')));
+            Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryScreen(title: title, phrases: phrases)));
           },
           child: Padding(
             padding: const EdgeInsets.all(14),
@@ -156,13 +152,13 @@ class HomeScreenContent extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(icon, color: textColor, size: 32),
+                Icon(icon, color: isGold ? AppColors.navy : AppColors.white, size: 32),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                    Text(title, style: TextStyle(color: isGold ? AppColors.navy : AppColors.white, fontWeight: FontWeight.bold, fontSize: 15)),
                     const SizedBox(height: 2),
-                    Text(sub, style: TextStyle(color: textColor.withOpacity(0.7), fontSize: 11)),
+                    Text(sub, style: TextStyle(color: isGold ? AppColors.navy.withOpacity(0.7) : AppColors.white.withOpacity(0.7), fontSize: 11)),
                   ],
                 ),
               ],
@@ -174,7 +170,7 @@ class HomeScreenContent extends StatelessWidget {
   }
 }
 
-// ================= 3. شاشة خطوات السفر (نفس التصميم السابق) =================
+// ================= 3. شاشة خطوات السفر =================
 class TravelStepsScreen extends StatelessWidget {
   const TravelStepsScreen({super.key});
 
@@ -199,15 +195,9 @@ class TravelStepsScreen extends StatelessWidget {
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: AppColors.navy.withOpacity(0.1),
-                child: Icon(step['icon'], color: AppColors.navy),
-              ),
+              leading: CircleAvatar(backgroundColor: AppColors.navy.withOpacity(0.1), child: Icon(step['icon'], color: AppColors.navy)),
               title: Text(step['title'], style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.navy)),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 6),
-                child: Text(step['desc']),
-              ),
+              subtitle: Padding(padding: const EdgeInsets.only(top: 6), child: Text(step['desc'])),
             ),
           );
         },
@@ -216,7 +206,7 @@ class TravelStepsScreen extends StatelessWidget {
   }
 }
 
-// ================= 4. شاشة الحاسبة (نفس التصميم السابق) =================
+// ================= 4. شاشة الحاسبة =================
 class TransitCalculatorScreen extends StatefulWidget {
   const TransitCalculatorScreen({super.key});
   @override
