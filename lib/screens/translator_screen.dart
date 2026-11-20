@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import '../theme.dart';
+import '../data/phrases_data.dart';
 
 class TranslatorScreen extends StatefulWidget {
   const TranslatorScreen({super.key});
@@ -11,7 +12,8 @@ class TranslatorScreen extends StatefulWidget {
 class _TranslatorScreenState extends State<TranslatorScreen> {
   final FlutterTts flutterTts = FlutterTts();
   String selectedLang = 'en';
-  
+  double speechRate = 0.8; // سرعة النطق الافتراضية
+
   final Map<String, String> langNames = {
     'en': '🇬🇧 English',
     'zh': '🇨🇳 中文',
@@ -21,16 +23,11 @@ class _TranslatorScreenState extends State<TranslatorScreen> {
     'am': '🇪🇹 አማርኛ',
   };
 
-  final List<Map<String, String>> phrases = [
-    {'icon': '👋', 'ar': 'مرحباً', 'en': 'Hello', 'zh': '你好', 'ms': 'Helo', 'tr': 'Merhaba', 'hi': 'नमस्ते', 'am': 'ሰላም'},
-    {'icon': '🙏', 'ar': 'شكراً جزيلاً', 'en': 'Thank you very much', 'zh': '非常感谢', 'ms': 'Terima kasih banyak', 'tr': 'Çok teşekkürler', 'hi': 'बहुत धन्यवाद', 'am': 'በጣም አመሰግናለሁ'},
-    {'icon': '🛑', 'ar': 'عفواً / المعذرة', 'en': 'Excuse me / Sorry', 'zh': '打扰一下 / 对不起', 'ms': 'Maafkan saya', 'tr': 'Affedersiniz', 'hi': 'माफ़ कीजिए', 'am': 'አዝናለሁ / ይቅርታ'},
-    {'icon': '🗣️', 'ar': 'لا أفهم', 'en': 'I do not understand', 'zh': '我不明白', 'ms': 'Saya tidak faham', 'tr': 'Anlamıyorum', 'hi': 'मैं समझा नहीं', 'am': 'አልገባኝም'},
-    {'icon': '🕐', 'ar': 'كم الساعة؟', 'en': 'What time is it?', 'zh': '现在几点了？', 'ms': 'Pukul berapa sekarang?', 'tr': 'Saat kaç?', 'hi': 'कितने बजे हैं?', 'am': 'ሰዓቱ ስንት ነው?'},
-    {'icon': '📍', 'ar': 'أين نحن الآن؟', 'en': 'Where are we now?', 'zh': '我们现在在哪里？', 'ms': 'Di manakah kita sekarang?', 'tr': 'Şu an neredeyiz?', 'hi': 'हम अब कहाँ हैं?', 'am': 'አሁን የት ነን?'},
-    {'icon': '📶', 'ar': 'هل يوجد واي فاي في المطار؟', 'en': 'Is there Wi-Fi in the airport?', 'zh': '机场有Wi-Fi吗？', 'ms': 'Adakah terdapat Wi-Fi di lapangan terbang?', 'tr': 'Havalimanında Wi-Fi var mı?', 'hi': 'क्या हवाई अड्डे में वाई-फाई है?', 'am': 'በአውሮፕላን ማረፊያው ውስጥ ዋይፋይ አለ?'},
-    {'icon': '🚕', 'ar': 'أريد تاكسي من فضلك', 'en': 'I want a taxi, please', 'zh': '请给我叫一辆出租车', 'ms': 'Saya mahu teksi, tolong', 'tr': 'Lütfen bir taksi istiyorum', 'hi': 'कृपया मुझे टैक्सी चाहिए', 'am': 'እባክዎ ታክሲ እፈልጋለሁ'},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    flutterTts.setSpeechRate(speechRate);
+  }
 
   Future<void> speak(String text) async {
     await flutterTts.setLanguage(selectedLang == 'en' ? 'en-US' : 
@@ -38,7 +35,7 @@ class _TranslatorScreenState extends State<TranslatorScreen> {
                                  selectedLang == 'ms' ? 'ms-MY' : 
                                  selectedLang == 'tr' ? 'tr-TR' : 
                                  selectedLang == 'hi' ? 'hi-IN' : 'am-ET');
-    await flutterTts.setSpeechRate(0.9);
+    await flutterTts.setSpeechRate(speechRate);
     await flutterTts.speak(text);
   }
 
@@ -52,19 +49,16 @@ class _TranslatorScreenState extends State<TranslatorScreen> {
         children: [
           // شريط اختيار اللغة
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             color: AppColors.navy2,
             child: Row(
               children: [
-                const Text('ترجمة إلى:', style: TextStyle(color: AppColors.gold2, fontWeight: FontWeight.bold, fontSize: 16)),
-                const SizedBox(width: 12),
+                const Text('اللغة:', style: TextStyle(color: AppColors.gold2, fontWeight: FontWeight.bold, fontSize: 14)),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(8)),
                     child: DropdownButton<String>(
                       value: selectedLang,
                       isExpanded: true,
@@ -79,16 +73,45 @@ class _TranslatorScreenState extends State<TranslatorScreen> {
               ],
             ),
           ),
-          
+
+          // شريط التحكم في سرعة القراءة
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            color: AppColors.navy2,
+            child: Row(
+              children: [
+                const Icon(Icons.speed, color: AppColors.gold2, size: 20),
+                const SizedBox(width: 8),
+                const Text('السرعة:', style: TextStyle(color: AppColors.gold2, fontSize: 12, fontWeight: FontWeight.bold)),
+                Expanded(
+                  child: Slider(
+                    value: speechRate,
+                    min: 0.3,
+                    max: 1.5,
+                    divisions: 12,
+                    activeColor: AppColors.gold,
+                    inactiveColor: Colors.white30,
+                    label: speechRate.toStringAsFixed(1),
+                    onChanged: (val) {
+                      setState(() => speechRate = val);
+                      flutterTts.setSpeechRate(speechRate);
+                    },
+                  ),
+                ),
+                Text(speechRate.toStringAsFixed(1), style: const TextStyle(color: AppColors.white, fontSize: 12)),
+              ],
+            ),
+          ),
+
           // قائمة العبارات
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: phrases.length,
+              itemCount: PhrasesData.basics.length,
               itemBuilder: (context, index) {
-                final phrase = phrases[index];
-                final translatedText = phrase[selectedLang] ?? phrase['en']!;
-                
+                final phrase = PhrasesData.basics[index];
+                final translatedText = phrase.getText(selectedLang);
+
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
@@ -109,14 +132,14 @@ class _TranslatorScreenState extends State<TranslatorScreen> {
                             height: 40,
                             decoration: BoxDecoration(color: AppColors.bg, borderRadius: BorderRadius.circular(10)),
                             alignment: Alignment.center,
-                            child: Text(phrase['icon']!, style: const TextStyle(fontSize: 22)),
+                            child: Text(phrase.icon, style: const TextStyle(fontSize: 22)),
                           ),
                           const SizedBox(width: 14),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(phrase['ar']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.navy)),
+                                Text(phrase.ar, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.navy)),
                                 const SizedBox(height: 6),
                                 Container(
                                   width: double.infinity,
