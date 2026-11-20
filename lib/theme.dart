@@ -7,12 +7,14 @@ class AppColors {
   static const Color gold2 = Color(0xFFF2D06B);
   static const Color white = Colors.white;
   static const Color bg = Color(0xFFF4F7FC);
+  static const Color textDark = Color(0xFF0B1E3A);
 }
 
 ThemeData buildAppTheme() {
   return ThemeData(
     primaryColor: AppColors.navy,
     scaffoldBackgroundColor: AppColors.bg,
+    fontFamily: 'Cairo', // يمكنك إضافة خط عربي لاحقاً
     appBarTheme: const AppBarTheme(
       backgroundColor: AppColors.navy,
       foregroundColor: AppColors.white,
@@ -26,12 +28,6 @@ ThemeData buildAppTheme() {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         padding: const EdgeInsets.symmetric(vertical: 14),
       ),
-    ),
-    cardTheme: CardTheme(
-      color: AppColors.white,
-      elevation: 4,
-      shadowColor: AppColors.navy.withOpacity(0.15),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
   );
 }
