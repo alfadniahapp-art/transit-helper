@@ -3,6 +3,8 @@ import 'theme.dart';
 import 'data/phrases_data.dart';
 import 'screens/translator_screen.dart';
 import 'screens/category_screen.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 void main() {
   runApp(const TransitApp());
@@ -16,6 +18,12 @@ class TransitApp extends StatelessWidget {
       title: 'Travel Mate',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
+      builder: (context, child) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: child!,
+        );
+      },
       home: const MainNavigationScreen(),
     );
   }
@@ -52,10 +60,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
         unselectedLabelStyle: const TextStyle(fontSize: 11),
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'الرئيسية'),
-          BottomNavigationBarItem(icon: Icon(Icons.translate), label: 'ترجمة'),
-          BottomNavigationBarItem(icon: Icon(Icons.directions_walk), label: 'الخطوات'),
           BottomNavigationBarItem(icon: Icon(Icons.timer), label: 'الحاسبة'),
+          BottomNavigationBarItem(icon: Icon(Icons.directions_walk), label: 'الخطوات'),
+          BottomNavigationBarItem(icon: Icon(Icons.translate), label: 'ترجمة'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'الرئيسية'),
         ],
       ),
     );
@@ -79,6 +87,7 @@ class HomeScreenContent extends StatelessWidget {
             flexibleSpace: FlexibleSpaceBar(
               title: Row(
                 mainAxisSize: MainAxisSize.min,
+                textDirection: TextDirection.ltr,
                 children: [
                   Container(
                     padding: const EdgeInsets.all(6),
@@ -187,20 +196,32 @@ class TravelStepsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('خطوات السفر')),
-      body: ListView.builder(
+      body: ListView(
         padding: const EdgeInsets.all(16),
-        itemCount: steps.length,
-        itemBuilder: (context, index) {
-          final step = steps[index];
-          return Card(
-            margin: const EdgeInsets.only(bottom: 12),
+        children: [
+          ...steps.map((step) {
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: ListTile(
+                leading: CircleAvatar(backgroundColor: AppColors.navy.withOpacity(0.1), child: Icon(step['icon'], color: AppColors.navy)),
+                title: Text(step['title'], style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.navy)),
+                subtitle: Padding(padding: const EdgeInsets.only(top: 6), child: Text(step['desc'])),
+              ),
+            );
+          }).toList(),
+          
+          const SizedBox(height: 20),
+          const Text('عبارات للمسافر في هذه الخطوات:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.navy)),
+          const SizedBox(height: 10),
+          ...PhrasesData.airport.map((phrase) => Card(
+            margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
-              leading: CircleAvatar(backgroundColor: AppColors.navy.withOpacity(0.1), child: Icon(step['icon'], color: AppColors.navy)),
-              title: Text(step['title'], style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.navy)),
-              subtitle: Padding(padding: const EdgeInsets.only(top: 6), child: Text(step['desc'])),
+              leading: Text(phrase.icon, style: const TextStyle(fontSize: 22)),
+              title: Text(phrase.ar, style: const TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text(phrase.en, style: const TextStyle(color: Colors.grey)),
             ),
-          );
-        },
+          )).toList(),
+        ],
       ),
     );
   }
@@ -233,6 +254,18 @@ class _TransitCalculatorScreenState extends State<TransitCalculatorScreen> {
     }
   }
 
+  Future<void> scanTicket() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.camera);
+    
+    if (image != null) {
+      // هنا يمكن إضافة منطق قراءة النص من الصورة (OCR) لاحقاً
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('جاري تحليل التذكرة... سيتم استخراج الوقت تلقائياً قريباً')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -246,6 +279,15 @@ class _TransitCalculatorScreenState extends State<TransitCalculatorScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.gold, foregroundColor: AppColors.navy),
+                      icon: const Icon(Icons.camera_alt),
+                      label: const Text('تصوير التذكرة لقراءة الترانزيت'),
+                      onPressed: scanTicket,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('أو أدخل الوقت يدوياً:', style: TextStyle(color: Colors.grey)),
+                    const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       value: selectedAirport,
                       decoration: const InputDecoration(labelText: 'اختر مطار الترانزيت', border: OutlineInputBorder()),
@@ -274,7 +316,7 @@ class _TransitCalculatorScreenState extends State<TransitCalculatorScreen> {
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.gold, foregroundColor: AppColors.navy),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.navy, foregroundColor: AppColors.white),
                       icon: const Icon(Icons.calculate),
                       label: const Text('احسب التوصية'),
                       onPressed: (arrival != null && departure != null) ? () => _calculate(context) : null,
