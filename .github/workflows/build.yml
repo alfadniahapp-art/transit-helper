@@ -23,8 +23,8 @@ jobs:
           flutter-version: '3.24.0'
           cache: true
 
-      - name: Generate Android Project
-        run: flutter create --project-name transit_helper --org com.alfadniah .
+      - name: Force Generate Android Project
+        run: flutter create --project-name transit_helper --org com.alfadniah . --overwrite
 
       - name: Get dependencies
         run: flutter pub get
