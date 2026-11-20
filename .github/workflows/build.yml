@@ -28,6 +28,14 @@ jobs:
       - name: Restore our original code
         run: git checkout -- lib/ pubspec.yaml
 
+      # الخطوة السحرية: إصلاح مشكلة مكتبة قراءة النصوص (ML Kit)
+      - name: Fix ML Kit R8 Issue
+        run: |
+          echo "-dontwarn com.google.mlkit.vision.text.chinese.**" >> android/app/proguard-rules.pro
+          echo "-dontwarn com.google.mlkit.vision.text.devanagari.**" >> android/app/proguard-rules.pro
+          echo "-dontwarn com.google.mlkit.vision.text.japanese.**" >> android/app/proguard-rules.pro
+          echo "-dontwarn com.google.mlkit.vision.text.korean.**" >> android/app/proguard-rules.apk
+
       - name: Get dependencies
         run: flutter pub get
 
