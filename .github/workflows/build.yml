@@ -23,6 +23,10 @@ jobs:
           flutter-version: '3.24.0'
           cache: true
 
+      # الخطوة السحرية: توليد ملفات الأندرويد الناقصة
+      - name: Generate missing project files
+        run: flutter create --project-name transit_helper --org com.alfadniah .
+
       - name: Get dependencies
         run: flutter pub get
 
