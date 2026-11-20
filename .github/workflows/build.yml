@@ -23,8 +23,13 @@ jobs:
           flutter-version: '3.24.0'
           cache: true
 
-      - name: Force Generate Android Project
-        run: flutter create --project-name transit_helper --org com.alfadniah . --overwrite
+      # 1. ننشئ ملفات الأندرويد الافتراضية
+      - name: Generate Android Project
+        run: flutter create --project-name transit_helper --org com.alfadniah .
+
+      # 2. نعيد ملفاتنا الأصلية التي قد يكون تم استبدالها
+      - name: Restore our original code
+        run: git checkout -- lib/ pubspec.yaml
 
       - name: Get dependencies
         run: flutter pub get
